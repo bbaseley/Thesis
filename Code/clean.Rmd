@@ -1,0 +1,208 @@
+
+# #######################################################################
+# File-Name:      clean_data.Rmd
+# Purpose:        Mutate the raw data to create independent variables.
+#                 Upload homeless (dep. variable) data and join
+#                 everything together to create final dataset for analysis.
+# #######################################################################
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(tidycensus)
+library(VIM)
+library(simputation)
+library(naniar)
+```
+
+```{r}
+all_counties_raw <- readRDS("all_counties_raw.RDS")
+all_counties_raw <- all_counties_raw %>% select(-moe)
+all_counties_raw <- all_counties_raw %>% spread(variable, estimate)
+
+# These all measure the same thing as B25003_001
+all_counties_raw <- all_counties_raw %>% select(-S2501_C01_001, -B19057_001, -B19056_001) 
+```
+
+# 1. Check for Missingness // Impute Missing Values
+```{r}
+miss_var_summary(all_counties_raw)
+gg_miss_var(all_counties_raw)
+all_counties_raw[rowSums(is.na(all_counties_raw)) > 0,]
+```
+
+```{r warning=FALSE}
+# Impute missing 2018 values with 2017 values
+codes <- c("B25064_001E", "B25071_001E", "B19056_002E", "B19057_002E", "B19083_001E", 
+          "B23025_003E", "B23025_005E", "S1701_C01_001E", "S1701_C01_038E")
+cross <- expand_grid(state.abb = c("TX", "NV", "NM"), codes)
+impute <- map2_df(.x = cross$state.abb, 
+                            .y = cross$codes, 
+                            ~get_acs(geography = "county",
+                                     state = .x,
+                                     year = 2017,
+                                     variables = .y,
+                                     key = Sys.getenv("CENSUS_TOKEN")))
+
+filtered <- impute %>% filter((GEOID == "32011" & variable == "B25064_001") |
+                                (GEOID == "35039" & variable == "B19056_002") |
+                                (GEOID == "35039" & variable == "B19057_002") |
+                                (GEOID == "35039" & variable == "B19083_001") |
+                                (GEOID == "35039" & variable == "B23025_003") |
+                                (GEOID == "35039" & variable == "B23025_005") |
+                                (GEOID == "35039" & variable == "B25071_001") |
+                                (GEOID == "35039" & variable == "S1701_C01_001") |
+                                (GEOID == "35039" & variable == "S1701_C01_038") |
+                                (GEOID == "48033" & variable == "B25064_001") |
+                                (GEOID == "48301" & variable == "B25064_001") |
+                                (GEOID == "48301" & variable == "B25071_001"))
+
+all_counties_raw[all_counties_raw$NAME == "Borden County, Texas", "B25064_001"] <- filtered[1, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Loving County, Texas", "B25064_001"] <- filtered[2, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Loving County, Texas", "B25071_001"] <- filtered[3, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Eureka County, Nevada", "B25064_001"] <- filtered[4, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "B25071_001"] <- filtered[5, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "B19056_002"] <- filtered[6, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "B19057_002"] <- filtered[7, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "B19083_001"] <- filtered[8, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "B23025_003"] <- filtered[9, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "B23025_005"] <- filtered[10, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "S1701_C01_001"] <- filtered[11, "estimate"]
+all_counties_raw[all_counties_raw$NAME == "Rio Arriba County, New Mexico", "S1701_C01_038"] <- filtered[12, "estimate"]
+
+gg_miss_var(all_counties_raw)
+
+# Adjust Gini index by factor of 100 to make it more interpretable
+all_counties_raw$B19083_001 <- all_counties_raw$B19083_001 * 100
+
+all_counties_raw <- all_counties_raw %>% gather(variable, value, B01003_001:S2501_C01_002)
+```
+
+# 2. Create crosswalk between counties and CoCs
+```{r message=FALSE}
+crosswalk <- read_csv("https://raw.githubusercontent.com/tomhbyrne/HUD-CoC-Geography-Crosswalk/master/output/county_coc_match.csv")
+crosswalk$state <- str_extract(crosswalk$coc_number, "[A-Z][A-Z]")
+crosswalk <- crosswalk %>% filter(!state %in% c("VI", "PR", "GU", "MP"))
+crosswalk <- crosswalk %>% filter(!is.na(coc_number)) %>%  filter(!is.na(county_fips))
+crosswalk$coc_number[crosswalk$coc_number == "MA-510_&_MA-516_Shared_Jurisdiction"] <- "MA-510"
+```
+
+```{r}
+join <- all_counties_raw %>% full_join(crosswalk, by = c("GEOID" = "county_fips")) %>% filter(!is.na(coc_number))
+join <- join %>% 
+  select(county_fips = GEOID, state, county = NAME, variable, value, coc_number, rel_type, pct_cnty_pop_coc)
+join <- join %>% spread(variable, value)
+join$wt <- join$pct_cnty_pop_coc / 100
+join$coc_number <- factor(join$coc_number)
+```
+
+# 3. Create Feature Variables
+
+```{r}
+subset1 <- join %>%
+  filter(rel_type != 3)  %>%
+  group_by(coc_number) %>%
+  summarize(
+    black = sum(B02001_003 * wt) / sum(B01003_001 * wt) * 100,
+    hispanic = sum(B03001_003 * wt) / sum(B01003_001 * wt) * 100,
+    share_rent = sum(B25003_003 * wt) / sum(B25003_001 * wt) * 100,
+    unemployment = sum(B23025_005 * wt) / sum(B23025_003 * wt) * 100,
+    share_pa = sum(B19057_002 * wt) / sum(B25003_001 * wt) * 100,
+    share_ssi = sum(B19056_002 * wt) / sum(B25003_001 * wt) * 100,
+    gini = (sum(B19083_001 * B01003_001 * wt)) / (sum(B01003_001 * wt)),
+    rent = (sum(B25064_001 * B01003_001 * wt)) / (sum(B01003_001 * wt)),
+    vacancy = sum(B25004_002 * wt) / (sum((B25004_002 + B25003_003 + B25004_003) * wt)) * 100,
+    single = sum(S2501_C01_002 * wt) / sum(B25003_001 * wt) * 100,
+    veteran = sum(S2101_C03_001 * wt) / sum(S2101_C01_001 * wt) * 100,
+    poverty = sum(S1701_C01_038 * wt) / sum(S1701_C01_001 * wt) * 100,
+    older = sum((S0101_C01_012+S0101_C01_013+S0101_C01_014+S0101_C01_015+S0101_C01_016) * wt) / sum(B01003_001 * wt) * 100,
+    pop_full = sum(B01003_001 * wt),
+    pop_pov = sum(S1701_C01_038 * wt)
+  )
+```
+
+```{r}
+subset2 <- join %>%
+  filter(rel_type == 3) %>%
+  mutate(coc_number = paste0(state, "-", county_fips)) %>%
+  group_by(coc_number) %>%
+  summarize(
+    black = sum(B02001_003 * wt) / sum(B01003_001 * wt) * 100,
+    hispanic = sum(B03001_003 * wt) / sum(B01003_001 * wt) * 100,
+    share_rent = sum(B25003_003 * wt) / sum(B25003_001 * wt) * 100,
+    unemployment = sum(B23025_005 * wt) / sum(B23025_003 * wt) * 100,
+    share_pa = sum(B19057_002 * wt) / sum(B25003_001 * wt) * 100,
+    share_ssi = sum(B19056_002 * wt) / sum(B25003_001 * wt) * 100,
+    gini = (sum(B19083_001 * B01003_001 * wt)) / (sum(B01003_001 * wt)),
+    rent = (sum(B25064_001 * B01003_001 * wt)) / (sum(B01003_001 * wt)),
+    vacancy = sum(B25004_002 * wt) / (sum((B25004_002 + B25003_003 + B25004_003) * wt)) * 100,
+    single = sum(S2501_C01_002 * wt) / sum(B25003_001 * wt) * 100,
+    veteran = sum(S2101_C03_001 * wt) / sum(S2101_C01_001 * wt) * 100,
+    poverty = sum(S1701_C01_038 * wt) / sum(S1701_C01_001 * wt) * 100,
+    older = sum((S0101_C01_012+S0101_C01_013+S0101_C01_014+S0101_C01_015+S0101_C01_016) * wt) / sum(B01003_001 * wt) * 100,
+    pop_full = sum(B01003_001 * wt),
+    pop_pov = sum(S1701_C01_038 * wt)
+  )
+```
+
+```{r}
+features <- bind_rows(subset1, subset2)
+```
+
+# Create Dependent Variable
+
+```{r message=FALSE, warning=TRUE}
+homeless_data <- read_csv("homeless.csv") %>% filter(!is.na(homeless_count))
+```
+
+```{r}
+# Cases where rel_type is 3 means that we just sum all of their homeless counts to create a "new" CoC
+rel_type_3 <- crosswalk %>% 
+  select(county_fips, state, coc_number, rel_type) %>% 
+  left_join(homeless_data) %>% 
+  filter(rel_type == 3) %>%
+  mutate(coc_number = paste0(state, "-", county_fips)) %>%
+  group_by(coc_number) %>%
+  summarize(homeless = sum(homeless_count),
+            category = case_when(coc_number == "CA-06037" ~ "Urban",
+                                 coc_number == "CT-09001" ~ "Urban",
+                                 coc_number == "GA-13089" ~ "Suburban",
+                                 coc_number == "IL-17111" ~ "Suburban",
+                                 coc_number == "MA-25005" ~ "Suburban",
+                                 coc_number == "MA-25009" ~ "Suburban",
+                                 coc_number == "MA-25017" ~ "Urban",
+                                 coc_number == "MA-25025" ~ "Urban",
+                                 coc_number == "MI-26163" ~ "Urban",
+                                 coc_number == "NE-31109" ~ "Urban",
+                                 coc_number == "NH-33011" ~ "Urban",
+                                 coc_number == "NM-35001" ~ "Urban",
+                                 coc_number == "OK-40027" ~ "Suburban",
+                                 coc_number == "WA-53053" ~ "Suburban")) %>%
+  unique()
+
+# Fetch the rest
+rest_of_cocs <- crosswalk %>% 
+  select(coc_number, rel_type) %>% 
+  left_join(homeless_data) %>% 
+  filter(rel_type != 3) %>%
+  select(-rel_type) %>%
+  rename(homeless = homeless_count) %>%
+  mutate(category = case_when(category == "Other Urban CoCs" | category == "Major Cities" ~ "Urban",
+                              category == "Suburban CoCs" ~ "Suburban",
+                              category == "Rural CoCs" ~ "Rural"))
+
+rest_of_cocs <- distinct(rest_of_cocs)
+
+homeless <- bind_rows(rel_type_3, rest_of_cocs)
+```
+
+```{r}
+homeless_full <- features %>% left_join(homeless)
+homeless_full$homeless_rate_full <- homeless_full$homeless / homeless_full$pop_full * 10000
+homeless_full$homeless_rate_pov <- homeless_full$homeless / homeless_full$pop_pov * 10000
+homeless_full$state <- str_extract(homeless_full$coc_number, "[A-Z][A-Z]")
+homeless_full <- homeless_full %>% filter(!is.na(homeless_rate_full))
+```
+
+```{r}
+saveRDS(homeless_full, "homeless_data.RDS")
+```

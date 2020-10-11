@@ -1,0 +1,399 @@
+coc_number,category,homeless_count
+AK-500,Other Urban CoCs,1094
+AK-501,Rural CoCs,922
+AL-500,Suburban CoCs,901
+AL-501,Other Urban CoCs,551
+AL-502,Rural CoCs,256
+AL-503,Other Urban CoCs,424
+AL-504,Other Urban CoCs,369
+AL-505,Rural CoCs,146
+AL-506,Other Urban CoCs,57
+AL-507,Rural CoCs,730
+AR-500,Other Urban CoCs,1081
+AR-501,Other Urban CoCs,474
+AR-503,Rural CoCs,768
+AR-504,Rural CoCs,57
+AR-505,Rural CoCs,101
+AR-508,Rural CoCs,231
+AR-512,Rural CoCs,NA
+AZ-500,Rural CoCs,2187
+AZ-501,Major Cities,1380
+AZ-502,Major Cities,6298
+CA-500,Major Cities,7254
+CA-501,Major Cities,6857
+CA-502,Major Cities,5496
+CA-503,Major Cities,3621
+CA-504,Suburban CoCs,2996
+CA-505,Suburban CoCs,2234
+CA-506,Rural CoCs,3299
+CA-507,Suburban CoCs,1095
+CA-508,Suburban CoCs,2320
+CA-509,Rural CoCs,880
+CA-510,Suburban CoCs,1356
+CA-511,Other Urban CoCs,1685
+CA-512,Suburban CoCs,1238
+CA-513,Other Urban CoCs,967
+CA-514,Major Cities,2144
+CA-515,Suburban CoCs,950
+CA-516,Rural CoCs,1149
+CA-517,Other Urban CoCs,322
+CA-518,Other Urban CoCs,1129
+CA-519,Rural CoCs,1125
+CA-520,Suburban CoCs,514
+CA-521,Suburban CoCs,448
+CA-522,Rural CoCs,703
+CA-523,Rural CoCs,268
+CA-524,Suburban CoCs,765
+CA-525,Suburban CoCs,645
+CA-526,Rural CoCs,398
+CA-527,Rural CoCs,125
+CA-529,Rural CoCs,615
+CA-530,Rural CoCs,157
+CA-600,Major Cities,49955
+CA-601,Major Cities,8576
+CA-602,Suburban CoCs,4955
+CA-603,Suburban CoCs,1706
+CA-604,Other Urban CoCs,885
+CA-606,Major Cities,1873
+CA-607,Other Urban CoCs,677
+CA-608,Suburban CoCs,2316
+CA-609,Suburban CoCs,2118
+CA-611,Other Urban CoCs,1308
+CA-612,Other Urban CoCs,260
+CA-613,Suburban CoCs,1493
+CA-614,Suburban CoCs,1095
+CO-500,Rural CoCs,3989
+CO-503,Major Cities,5317
+CO-504,Major Cities,1551
+CT-503,Other Urban CoCs,741
+CT-505,Suburban CoCs,3235
+DC-500,Major Cities,6904
+DE-500,Suburban CoCs,1082
+FL-500,Suburban CoCs,1192
+FL-501,Suburban CoCs,1795
+FL-502,Suburban CoCs,2612
+FL-503,Suburban CoCs,552
+FL-504,Suburban CoCs,683
+FL-505,Suburban CoCs,495
+FL-506,Other Urban CoCs,909
+FL-507,Suburban CoCs,2053
+FL-508,Rural CoCs,756
+FL-509,Suburban CoCs,1542
+FL-510,Major Cities,1794
+FL-511,Suburban CoCs,632
+FL-512,Suburban CoCs,342
+FL-513,Suburban CoCs,734
+FL-514,Suburban CoCs,572
+FL-515,Rural CoCs,381
+FL-517,Rural CoCs,453
+FL-518,Rural CoCs,493
+FL-519,Suburban CoCs,2668
+FL-520,Suburban CoCs,711
+FL-600,Major Cities,3516
+FL-601,Suburban CoCs,2318
+FL-602,Suburban CoCs,164
+FL-603,Suburban CoCs,728
+FL-604,Rural CoCs,973
+FL-605,Suburban CoCs,1309
+FL-606,Suburban CoCs,653
+GA-500,Major Cities,3076
+GA-501,Rural CoCs,3730
+GA-502,Suburban CoCs,222
+GA-503,Other Urban CoCs,212
+GA-504,Other Urban CoCs,269
+GA-505,Other Urban CoCs,276
+GA-506,Suburban CoCs,384
+GA-507,Other Urban CoCs,1009
+GA-508,Suburban CoCs,321
+GU-500,Rural CoCs,854
+HI-500,Rural CoCs,2035
+HI-501,Suburban CoCs,4495
+IA-500,Other Urban CoCs,264
+IA-501,Rural CoCs,1721
+IA-502,Other Urban CoCs,764
+ID-500,Other Urban CoCs,756
+ID-501,Rural CoCs,1256
+IL-500,Suburban CoCs,179
+IL-501,Suburban CoCs,256
+IL-502,Suburban CoCs,277
+IL-503,Other Urban CoCs,188
+IL-504,Suburban CoCs,146
+IL-506,Suburban CoCs,341
+IL-507,Suburban CoCs,400
+IL-508,Suburban CoCs,250
+IL-509,Suburban CoCs,100
+IL-510,Major Cities,5450
+IL-511,Suburban CoCs,873
+IL-512,Rural CoCs,387
+IL-513,Other Urban CoCs,271
+IL-514,Suburban CoCs,295
+IL-515,Rural CoCs,92
+IL-516,Other Urban CoCs,161
+IL-517,Suburban CoCs,430
+IL-518,Rural CoCs,198
+IL-519,Rural CoCs,67
+IL-520,Rural CoCs,282
+IN-502,Rural CoCs,3576
+IN-503,Major Cities,1682
+KS-502,Major Cities,573
+KS-503,Other Urban CoCs,408
+KS-505,Suburban CoCs,168
+KS-507,Rural CoCs,918
+KY-500,Rural CoCs,2077
+KY-501,Major Cities,926
+KY-502,Other Urban CoCs,685
+LA-500,Rural CoCs,363
+LA-502,Other Urban CoCs,375
+LA-503,Major Cities,1188
+LA-505,Rural CoCs,187
+LA-506,Suburban CoCs,194
+LA-507,Rural CoCs,177
+LA-509,Suburban CoCs,575
+MA-500,Major Cities,6188
+MA-502,Suburban CoCs,1061
+MA-503,Suburban CoCs,358
+MA-504,Suburban CoCs,3368
+MA-505,Suburban CoCs,409
+MA-506,Suburban CoCs,1852
+MA-507,Suburban CoCs,651
+MA-508,Suburban CoCs,783
+MA-509,Other Urban CoCs,561
+MA-510,Suburban CoCs,732
+MA-511,Suburban CoCs,1090
+MA-515,Suburban CoCs,377
+MA-516,Suburban CoCs,2296
+MA-517,Suburban CoCs,134
+MA-519,Suburban CoCs,208
+MD-500,Suburban CoCs,79
+MD-501,Major Cities,2508
+MD-502,Suburban CoCs,190
+MD-503,Suburban CoCs,366
+MD-504,Suburban CoCs,168
+MD-505,Suburban CoCs,758
+MD-506,Suburban CoCs,173
+MD-507,Suburban CoCs,129
+MD-508,Suburban CoCs,492
+MD-509,Suburban CoCs,316
+MD-510,Rural CoCs,15
+MD-511,Rural CoCs,141
+MD-512,Suburban CoCs,199
+MD-513,Rural CoCs,292
+MD-600,Suburban CoCs,478
+MD-601,Suburban CoCs,840
+ME-500,Rural CoCs,2516
+MI-500,Rural CoCs,1343
+MI-501,Major Cities,1769
+MI-502,Suburban CoCs,211
+MI-503,Suburban CoCs,270
+MI-504,Suburban CoCs,427
+MI-505,Suburban CoCs,438
+MI-506,Other Urban CoCs,723
+MI-507,Other Urban CoCs,567
+MI-508,Other Urban CoCs,419
+MI-509,Suburban CoCs,282
+MI-510,Suburban CoCs,357
+MI-511,Rural CoCs,117
+MI-512,Rural CoCs,235
+MI-513,Rural CoCs,70
+MI-514,Other Urban CoCs,236
+MI-515,Suburban CoCs,209
+MI-516,Suburban CoCs,159
+MI-517,Rural CoCs,81
+MI-518,Suburban CoCs,90
+MI-519,Suburban CoCs,226
+MI-523,Suburban CoCs,122
+MN-500,Major Cities,3013
+MN-501,Other Urban CoCs,1424
+MN-502,Rural CoCs,497
+MN-503,Suburban CoCs,625
+MN-504,Rural CoCs,90
+MN-505,Rural CoCs,584
+MN-506,Rural CoCs,274
+MN-508,Rural CoCs,246
+MN-509,Rural CoCs,425
+MN-511,Rural CoCs,65
+MO-500,Suburban CoCs,450
+MO-501,Other Urban CoCs,949
+MO-503,Suburban CoCs,532
+MO-600,Other Urban CoCs,479
+MO-602,Rural CoCs,275
+MO-603,Other Urban CoCs,204
+MO-604,Major Cities,1798
+MO-606,Rural CoCs,1345
+MP-500,Rural CoCs,1044
+MS-500,Suburban CoCs,446
+MS-501,Rural CoCs,560
+MS-503,Rural CoCs,346
+MT-500,Rural CoCs,1405
+NC-500,Other Urban CoCs,440
+NC-501,Suburban CoCs,554
+NC-502,Other Urban CoCs,338
+NC-503,Rural CoCs,2991
+NC-504,Other Urban CoCs,657
+NC-505,Major Cities,1668
+NC-506,Suburban CoCs,333
+NC-507,Major Cities,983
+NC-509,Suburban CoCs,331
+NC-511,Other Urban CoCs,372
+NC-513,Other Urban CoCs,152
+NC-516,Rural CoCs,449
+ND-500,Rural CoCs,542
+NE-500,Rural CoCs,559
+NE-501,Major Cities,1411
+NE-502,Other Urban CoCs,451
+NH-500,Rural CoCs,742
+NH-501,Other Urban CoCs,427
+NH-502,Suburban CoCs,281
+NJ-500,Suburban CoCs,437
+NJ-501,Suburban CoCs,354
+NJ-502,Suburban CoCs,840
+NJ-503,Suburban CoCs,999
+NJ-504,Suburban CoCs,2228
+NJ-506,Suburban CoCs,860
+NJ-507,Suburban CoCs,597
+NJ-508,Suburban CoCs,335
+NJ-509,Suburban CoCs,398
+NJ-510,Suburban CoCs,354
+NJ-511,Suburban CoCs,434
+NJ-512,Suburban CoCs,49
+NJ-513,Suburban CoCs,218
+NJ-514,Suburban CoCs,479
+NJ-515,Suburban CoCs,478
+NJ-516,Suburban CoCs,338
+NM-500,Major Cities,1340
+NM-501,Rural CoCs,1211
+NV-500,Major Cities,6083
+NV-501,Other Urban CoCs,1192
+NV-502,Rural CoCs,269
+NY-500,Suburban CoCs,835
+NY-501,Rural CoCs,233
+NY-503,Suburban CoCs,835
+NY-504,Rural CoCs,33
+NY-505,Suburban CoCs,722
+NY-507,Suburban CoCs,393
+NY-508,Suburban CoCs,957
+NY-510,Rural CoCs,91
+NY-511,Rural CoCs,244
+NY-512,Suburban CoCs,178
+NY-513,Rural CoCs,182
+NY-514,Rural CoCs,145
+NY-516,Rural CoCs,197
+NY-518,Rural CoCs,178
+NY-519,Rural CoCs,196
+NY-520,Rural CoCs,42
+NY-522,Rural CoCs,96
+NY-523,Suburban CoCs,257
+NY-600,Major Cities,78676
+NY-601,Suburban CoCs,399
+NY-602,Suburban CoCs,480
+NY-603,Suburban CoCs,3868
+NY-604,Suburban CoCs,1827
+NY-606,Suburban CoCs,180
+NY-607,Rural CoCs,189
+NY-608,Rural CoCs,464
+OH-500,Suburban CoCs,1114
+OH-501,Other Urban CoCs,662
+OH-502,Suburban CoCs,1808
+OH-503,Major Cities,1807
+OH-504,Other Urban CoCs,180
+OH-505,Suburban CoCs,680
+OH-506,Suburban CoCs,587
+OH-507,Rural CoCs,3133
+OH-508,Suburban CoCs,278
+OK-500,Rural CoCs,181
+OK-501,Major Cities,1083
+OK-502,Major Cities,1183
+OK-503,Rural CoCs,233
+OK-504,Suburban CoCs,364
+OK-505,Rural CoCs,392
+OK-506,Rural CoCs,191
+OK-507,Rural CoCs,244
+OR-500,Other Urban CoCs,1641
+OR-501,Major Cities,4019
+OR-502,Suburban CoCs,732
+OR-503,Rural CoCs,787
+OR-505,Rural CoCs,6392
+OR-506,Suburban CoCs,522
+OR-507,Suburban CoCs,383
+PA-500,Major Cities,5788
+PA-501,Suburban CoCs,445
+PA-502,Suburban CoCs,414
+PA-503,Suburban CoCs,165
+PA-504,Suburban CoCs,291
+PA-505,Suburban CoCs,579
+PA-506,Suburban CoCs,562
+PA-508,Suburban CoCs,159
+PA-509,Rural CoCs,1998
+PA-510,Suburban CoCs,406
+PA-511,Suburban CoCs,397
+PA-512,Suburban CoCs,324
+PA-600,Suburban CoCs,783
+PA-601,Rural CoCs,748
+PA-603,Suburban CoCs,117
+PA-605,Suburban CoCs,336
+PR-502,Suburban CoCs,1643
+PR-503,Suburban CoCs,1539
+RI-500,Suburban CoCs,1101
+SC-500,Suburban CoCs,451
+SC-501,Suburban CoCs,1185
+SC-502,Suburban CoCs,1205
+SC-503,Rural CoCs,1092
+SD-500,Rural CoCs,1159
+TN-500,Rural CoCs,623
+TN-501,Major Cities,1226
+TN-502,Suburban CoCs,743
+TN-503,Rural CoCs,268
+TN-504,Major Cities,2298
+TN-506,Rural CoCs,258
+TN-507,Rural CoCs,1026
+TN-509,Rural CoCs,360
+TN-510,Suburban CoCs,283
+TN-512,Rural CoCs,798
+TX-500,Major Cities,3066
+TX-503,Major Cities,2147
+TX-600,Major Cities,4121
+TX-601,Major Cities,2015
+TX-603,Major Cities,892
+TX-604,Rural CoCs,188
+TX-607,Rural CoCs,7638
+TX-611,Other Urban CoCs,665
+TX-624,Rural CoCs,238
+TX-700,Major Cities,4143
+TX-701,Other Urban CoCs,197
+UT-500,Suburban CoCs,1804
+UT-503,Suburban CoCs,899
+UT-504,Suburban CoCs,173
+VA-500,Suburban CoCs,609
+VA-501,Suburban CoCs,773
+VA-502,Suburban CoCs,317
+VA-503,Major Cities,243
+VA-504,Rural CoCs,183
+VA-505,Other Urban CoCs,439
+VA-507,Other Urban CoCs,135
+VA-508,Rural CoCs,112
+VA-513,Rural CoCs,304
+VA-514,Suburban CoCs,200
+VA-521,Rural CoCs,718
+VA-600,Other Urban CoCs,221
+VA-601,Suburban CoCs,987
+VA-602,Suburban CoCs,134
+VA-603,Other Urban CoCs,226
+VA-604,Suburban CoCs,374
+VI-500,Rural CoCs,486
+VT-500,Rural CoCs,932
+VT-501,Other Urban CoCs,359
+WA-500,Major Cities,12112
+WA-501,Rural CoCs,5666
+WA-502,Other Urban CoCs,1245
+WA-503,Suburban CoCs,1628
+WA-504,Suburban CoCs,858
+WA-508,Suburban CoCs,795
+WI-500,Rural CoCs,3147
+WI-501,Major Cities,871
+WI-502,Suburban CoCs,275
+WI-503,Other Urban CoCs,614
+WV-500,Rural CoCs,108
+WV-501,Rural CoCs,190
+WV-503,Suburban CoCs,317
+WV-508,Rural CoCs,628
+WY-500,Rural CoCs,639

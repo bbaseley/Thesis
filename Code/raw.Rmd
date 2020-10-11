@@ -1,0 +1,39 @@
+
+# #######################################################################
+# File-Name:      raw_data.Rmd
+# Purpose:        Pulling raw data from Census Bureau and BLS that will
+#                 be used to create the independent variables for models.
+# #######################################################################
+
+```{r message=FALSE, warning=TRUE}
+library(tidyverse)
+library(tidycensus)
+```
+
+# 1. PULL CENSUS BUREAU DATA
+```{r}
+codes <- c("B01003_001E", "B02001_003E", "B03001_003E",
+           "B25071_001E", "B25003_001E", "B25003_003E",
+           "B25004_002E", "B25004_003E", "B19083_001E",
+           "S2501_C01_001E", "S2501_C01_002E", "B23025_003E",
+           "B23025_005E", "S0101_C01_012E",
+           "S0101_C01_013E", "S0101_C01_014E", "S0101_C01_015E",
+           "S0101_C01_016E", "S2101_C01_001E", "S2101_C03_001E",
+           "S1701_C01_001E", "S1701_C01_038E", "B19057_001E",
+           "B19057_002E", "B19056_001E", "B19056_002E", "B25064_001E")
+```
+
+```{r}
+cross <- expand_grid(state.abb = c(state.abb, "DC"), codes)
+all_counties_raw <- map2_df(.x = cross$state.abb, 
+                            .y = cross$codes, 
+                            ~get_acs(geography = "county",
+                                     state = .x,
+                                     year = 2018,
+                                     variables = .y,
+                                     key = Sys.getenv("CENSUS_TOKEN")))
+```
+
+```{r}
+saveRDS(all_counties_raw, "all_counties_raw.RDS")
+```

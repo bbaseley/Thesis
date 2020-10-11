@@ -1,0 +1,446 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# #######################################################################
+# File-Name:      visualizations.Rmd
+# Purpose:        Used to generate all charts/tables for final paper.
+# #######################################################################
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(stargazer)
+library(broom.mixed)
+library(lmerTest)
+```
+
+```{r include=FALSE}
+homeless <- readRDS("homeless_data.RDS")
+homeless$state <- factor(homeless$state)
+```
+
+# Descriptive Statistics
+```{r include=FALSE}
+# Write custom function to calculate summary statistics
+desc_stat <- function(f, location) {
+  stats <- homeless %>% select(-state, -coc_number, -pop_full, -pop_pov, -homeless) 
+  out <- stats %>% group_by(category) %>% summarize_all(f)
+  out <- out %>% gather(key, value, black:homeless_rate_pov)
+  out$value <- round(out$value, 2)
+  out$value <- as.character(out$value)
+  t <- expand_grid(category = c("Urban", "Suburban", "Rural"), 
+                   key = c("homeless_header", "econ_header", "housing_header", "demo_header", "safety_header"), 
+                   value = "")
+  out <- bind_rows(out, t)
+  out <- out %>%
+    mutate(order = case_when(
+      key == "homeless_header" ~ 1,
+      key == "homeless_rate_full" ~ 2,
+      key == "homeless_rate_pov" ~ 3,
+      key == "econ_header" ~ 4,
+      key == "gini" ~ 5,
+      key == "unemployment" ~ 6,
+      key == "poverty" ~ 7,
+      key == "housing_header" ~ 8,
+      key == "rent" ~ 9,
+      key == "share_rent" ~ 10,
+      key == "vacancy" ~ 11,
+      key == "demo_header" ~ 12,
+      key == "black" ~ 13,
+      key == "hispanic" ~ 14,
+      key == "single" ~ 15,
+      key == "veteran" ~ 16,
+      key == "older" ~ 17,
+      key == "safety_header" ~ 18,
+      key == "share_pa" ~ 19,
+      key == "share_ssi" ~ 20))
+  final <- out %>% filter(category == location) %>% arrange(order) %>% pull(value)
+  return(final)
+}
+```
+
+```{r include=FALSE}
+tab_01 = data.frame(
+  parameter = c(
+    "HOMELESSNESS RATE", 
+    paste0("\\hspace{1em}","Per 10,000 in General Population"), 
+    paste0("\\hspace{1em}","Per 10,000 in Poverty", "\\break"),
+    "ECONOMIC",
+    paste0("\\hspace{1em}","Gini Index"),
+    paste0("\\hspace{1em}","Unemployment Rate"),
+    paste0("\\hspace{1em}","Poverty Rate", "\\break"),
+    "HOUSING",
+    paste0("\\hspace{1em}","Median Gross Rent"),
+    paste0("\\hspace{1em}","Renters"),
+    paste0("\\hspace{1em}","Rental Vacancy Rate", "\\break"),
+    "DEMOGRAPHIC",
+    paste0("\\hspace{1em}","Blacks"),
+    paste0("\\hspace{1em}","Hispanics"),
+    paste0("\\hspace{1em}","Single Households"),
+    paste0("\\hspace{1em}","Veterans"),
+    paste0("\\hspace{1em}","Baby Boomers", "\\break"),
+    "SAFETY NET",
+    paste0("\\hspace{1em}","Public Assistance"),
+    paste0("\\hspace{1em}","Supplemental Security Income")
+    ),
+  mean1 = desc_stat(mean, "Urban"),
+  med1 = desc_stat(median, "Urban"),
+  sd1 = desc_stat(sd, "Urban"),
+  min1 = desc_stat(min, "Urban"),
+  max1 = desc_stat(max, "Urban"),
+  mean2 = desc_stat(mean, "Suburban"),
+  med2 = desc_stat(median, "Suburban"),
+  sd2 = desc_stat(sd, "Suburban"),
+  min2 = desc_stat(min, "Suburban"),
+  max2 = desc_stat(max, "Suburban"),
+  mean3 = desc_stat(mean, "Rural"),
+  med3 = desc_stat(median, "Rural"),
+  sd3 = desc_stat(sd, "Rural"),
+  min3 = desc_stat(min, "Rural"),
+  max3 = desc_stat(max, "Rural")
+)
+```
+
+```{r}
+kable(
+  tab_01,
+  format = "latex",
+  booktabs = TRUE,
+  escape = FALSE,
+  longtable = F,
+  linesep = "",
+  col.names = c("Variable", "Mean", "Med", "SD", "Min", "Max", "Mean", "Med", "SD", "Min", "Max", "Mean", "Med", "SD", 
+                "Min", "Max"),
+  align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
+  caption = "Descriptive Statistics"
+  ) %>%
+  kable_styling(full_width = TRUE) %>%
+  column_spec(column = 1, width = "2.2in") %>%
+  column_spec(column = 2, width = "0.33in") %>%
+  column_spec(column = 3, width = "0.33in") %>%
+  column_spec(column = 4, width = "0.33in") %>%
+  column_spec(column = 5, width = "0.33in") %>%
+  column_spec(column = 6, width = "0.39in") %>%
+  column_spec(column = 7, width = "0.33in") %>%
+  column_spec(column = 8, width = "0.33in") %>%
+  column_spec(column = 9, width = "0.33in") %>%
+  column_spec(column = 10, width = "0.33in") %>%
+  column_spec(column = 11, width = "0.39in") %>%
+  column_spec(column = 12, width = "0.33in") %>%
+  column_spec(column = 13, width = "0.33in") %>%
+  column_spec(column = 14, width = "0.33in") %>%
+  column_spec(column = 15, width = "0.33in") %>%
+  column_spec(column = 16, width = "0.33in") %>%
+  add_header_above(
+    c(" " = 1, "Urban CoCs (N=104)" = 5, "Suburban CoCs (N=165)" = 5, "Rural CoCs (N=111)" = 5),
+    escape = FALSE
+    ) %>%
+  kableExtra::landscape()
+```
+
+# Model Results
+```{r include=FALSE}
+urban <- homeless %>% 
+  filter(category == "Urban") %>% select(-coc_number, -pop_full, -pop_pov, -homeless, -category)
+
+suburban <- homeless %>%
+  filter(category == "Suburban") %>% select(-coc_number, -pop_full, -pop_pov, -homeless, -category)
+
+rural <- homeless %>%
+  filter(category == "Rural") %>% select(-coc_number, -pop_full, -pop_pov, -homeless, -category)
+
+lm_urban_full <- lmerTest::lmer(log(homeless_rate_full) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(poverty) + log(older) + (1|state), urban)
+lm_suburban_full <- lmerTest::lmer(log(homeless_rate_full) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(poverty) + log(older) + (1|state), suburban)
+lm_rural_full <- lmerTest::lmer(log(homeless_rate_full) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(poverty) + log(older) + (1|state), rural)
+
+lm_urban_pov <- lmerTest::lmer(log(homeless_rate_pov) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(older) + (1|state), urban)
+lm_suburban_pov <- lmerTest::lmer(log(homeless_rate_pov) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(older) + (1|state), suburban)
+lm_rural_pov <- lmerTest::lmer(log(homeless_rate_pov) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(older) + (1|state), rural)
+```
+
+```{r include=FALSE}
+# Write custom function to calculate and pull all model outputs
+get_model_results <- function(lm, parameter) {
+  results <- broom.mixed::tidy(lm, conf.int = TRUE) %>% select(term, estimate, p.value, conf.low, conf.high)
+  results <- bind_cols(results[, 1], round(results[, -1], 2))
+  results$conf_int <- paste0("(", results$conf.low, ", ", results$conf.high, ")")
+  results <- results %>% select(-conf.low, -conf.high) %>% gather(key, value, estimate:conf_int)
+  results$value <- ifelse(is.na(results$value) | results$value == "(NA, NA)", "", results$value)
+  
+  r2 <- performance::r2_nakagawa(lm)
+  r2_full <- data.frame(term = c(rep("conditional_r2",3), rep("marginal_rr", 3)), 
+                        key = rep(c("estimate", "conf_int", "p.value"), 2), 
+                        value = c(c(round(r2$R2_conditional, 2), "", ""), c(round(r2$R2_marginal,2), "", "")))
+  rownames(r2_full) <- NULL
+  
+  r2_full$term <- as.character(r2_full$term)
+  r2_full$key <- as.character(r2_full$key)
+  r2_full$value <- as.character(r2_full$value)
+  
+  results <- bind_rows(results, r2_full)
+  
+  t <- expand_grid(term = c("econ_header", "housing_header", "demo_header", "safety_header"),
+                   key = c("conf_int", "estimate", "p.value"),
+                   value = "")
+  
+  results <- bind_rows(results, t)
+  
+  results <- results %>%
+    mutate(order = case_when(
+      term == "(Intercept)" ~ 1,
+      term == "econ_header" ~ 2,
+      term == "log(gini)" ~ 3,
+      term == "log(unemployment)" ~ 4,
+      term == "log(poverty)" ~ 5,
+      term == "housing_header" ~ 6,
+      term == "log(rent)" ~ 7,
+      term == "log(share_rent)" ~ 8,
+      term == "log(vacancy)" ~ 9,
+      term == "demo_header" ~ 10,
+      term == "log(black)" ~ 11,
+      term == "log(hispanic)" ~ 12,
+      term == "log(single)" ~ 13,
+      term == "log(veteran)" ~ 14,
+      term == "log(older)" ~ 15,
+      term == "safety_header" ~ 16,
+      term == "log(share_pa)" ~ 17,
+      term == "log(share_ssi)" ~ 18,
+      term == "sd__(Intercept)" ~ 19,
+      term == "conditional_r2" ~ 20,
+      term == "marginal_rr" ~ 21))
+  
+  out <- results %>% filter(key == parameter, term != "sd__Observation") %>% arrange(order) %>% pull(value)
+
+  return(out)
+}
+```
+
+
+````{r include=FALSE}
+tab_02 = data.frame(
+  parameter = c(
+    "Intercept\\break",
+    "ECONOMIC",
+    paste0("\\hspace{1em}","Gini Index"),
+    paste0("\\hspace{1em}","Unemployment Rate"),
+    paste0("\\hspace{1em}","Poverty Rate", "\\break"),
+    "HOUSING",
+    paste0("\\hspace{1em}","Median Gross Rent"),
+    paste0("\\hspace{1em}","Renters"),
+    paste0("\\hspace{1em}","Rental Vacancy Rate", "\\break"),
+    "DEMOGRAPHIC",
+    paste0("\\hspace{1em}","Blacks"),
+    paste0("\\hspace{1em}","Hispanics"),
+    paste0("\\hspace{1em}","Single Households"),
+    paste0("\\hspace{1em}","Veterans"),
+    paste0("\\hspace{1em}","Baby Boomers", "\\break"),
+    "SAFETY NET",
+    paste0("\\hspace{1em}","Public Assistance"),
+    paste0("\\hspace{1em}","Supplemental Security Income", "\\break"),
+    "SD of Random Intercepts",
+    "Conditional R\\textsuperscript{2}",
+    "Marginal R\\textsuperscript{2}"
+    ),
+  B1 = get_model_results(lm_urban_full, "estimate"),
+  CI1 = get_model_results(lm_urban_full, "conf_int"),
+  p1 = get_model_results(lm_urban_full, "p.value"),
+  B2 = get_model_results(lm_suburban_full, "estimate"),
+  CI2 = get_model_results(lm_suburban_full, "conf_int"),
+  p2 = get_model_results(lm_suburban_full, "p.value"),
+  B3 = get_model_results(lm_rural_full, "estimate"),
+  CI3 = get_model_results(lm_rural_full, "conf_int"),
+  p3 = get_model_results(lm_rural_full, "p.value"))
+```
+
+```{r}
+kable(
+  tab_02,
+  format = "latex",
+  booktabs = TRUE,
+  escape = FALSE,
+  longtable = F,
+  linesep = "",
+  col.names = c("Variable", "B", "95\\% CI", "p", "B", "95\\% CI", "p", "B", "95\\% CI", "p"),
+  align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
+  caption = "Summary of Mixed-Effects Model for Variables Predicting Homelessness per 10,000 People in General Population"
+  ) %>%
+  kable_styling(full_width = TRUE) %>%
+  #footnote(
+   # general_title = "Note.",
+    #general = "For each participant, the logistic function was fit to target fixations separately. The maximum asymptote is the asymptotic degree of looking at the end of the time course fixations. The crossover is the point in time when the function crosses the midway point between peak and baseline. The slope represents the rate of change in the function measured at the crossover. Mean parameter values for each of the analyses are shown for the 9-year-olds ($n=24$) and the 16-year-olds ($n=18$), as well as the results of $t$ tests (assuming unequal variance) comparing the parameter estimates between the two ages.",
+   # threeparttable = TRUE,
+  #  footnote_as_chunk = TRUE,
+   # escape = FALSE
+  #  ) %>%
+  column_spec(column = 1, width = "2.2in") %>%
+  column_spec(column = 3, width = "1in") %>%
+  column_spec(column = 6, width = "1in") %>%
+  column_spec(column = 9, width = "1in") %>%
+  add_header_above(
+    c(" " = 1, "Urban CoCs (N=104)" = 3, "Suburban CoCs (N=165)" = 3, "Rural CoCs (N=111)" = 3),
+    escape = FALSE
+    ) %>%
+  kableExtra::landscape()
+```
+
+```{r include=FALSE}
+get_model_results <- function(lm, parameter) {
+  results <- broom.mixed::tidy(lm, conf.int = TRUE) %>% select(term, estimate, p.value, conf.low, conf.high)
+  results <- bind_cols(results[, 1], round(results[, -1], 2))
+  results$conf_int <- paste0("(", results$conf.low, ", ", results$conf.high, ")")
+  results <- results %>% select(-conf.low, -conf.high) %>% gather(key, value, estimate:conf_int)
+  results$value <- ifelse(is.na(results$value) | results$value == "(NA, NA)", "", results$value)
+  
+  r2 <- performance::r2_nakagawa(lm)
+  r2_full <- data.frame(term = c(rep("conditional_r2",3), rep("marginal_rr", 3)), 
+                        key = rep(c("estimate", "conf_int", "p.value"), 2), 
+                        value = c(c(round(r2$R2_conditional, 2), "", ""), c(round(r2$R2_marginal,2), "", "")))
+  rownames(r2_full) <- NULL
+  
+  r2_full$term <- as.character(r2_full$term)
+  r2_full$key <- as.character(r2_full$key)
+  r2_full$value <- as.character(r2_full$value)
+  
+  results <- bind_rows(results, r2_full)
+  
+  t <- expand_grid(term = c("econ_header", "housing_header", "demo_header", "safety_header"),
+                   key = c("conf_int", "estimate", "p.value"),
+                   value = "")
+  
+  results <- bind_rows(results, t)
+  
+  results <- results %>%
+    mutate(order = case_when(
+      term == "(Intercept)" ~ 1,
+      term == "econ_header" ~ 2,
+      term == "log(gini)" ~ 3,
+      term == "log(unemployment)" ~ 4,
+      term == "housing_header" ~ 5,
+      term == "log(rent)" ~ 6,
+      term == "log(share_rent)" ~ 7,
+      term == "log(vacancy)" ~ 8,
+      term == "demo_header" ~ 9,
+      term == "log(black)" ~ 10,
+      term == "log(hispanic)" ~ 11,
+      term == "log(single)" ~ 12,
+      term == "log(veteran)" ~ 13,
+      term == "log(older)" ~ 14,
+      term == "safety_header" ~ 15,
+      term == "log(share_pa)" ~ 16,
+      term == "log(share_ssi)" ~ 17,
+      term == "sd__(Intercept)" ~ 18,
+      term == "conditional_r2" ~ 19,
+      term == "marginal_rr" ~ 20))
+  
+  out <- results %>% filter(key == parameter, term != "sd__Observation") %>% arrange(order) %>% pull(value)
+
+  return(out)
+}
+```
+
+```{r include=FALSE}
+tab_03 = data.frame(
+  parameter = c(
+    "Intercept\\break",
+    "ECONOMIC",
+    paste0("\\hspace{1em}","Gini Index"),
+    paste0("\\hspace{1em}","Unemployment Rate", "\\break"),
+    "HOUSING",
+    paste0("\\hspace{1em}","Median Gross Rent"),
+    paste0("\\hspace{1em}","Renters"),
+    paste0("\\hspace{1em}","Rental Vacancy Rate", "\\break"),
+    "DEMOGRAPHIC",
+    paste0("\\hspace{1em}","Blacks"),
+    paste0("\\hspace{1em}","Hispanics"),
+    paste0("\\hspace{1em}","Single Households"),
+    paste0("\\hspace{1em}","Veterans"),
+    paste0("\\hspace{1em}","Baby Boomers", "\\break"),
+    "SAFETY NET",
+    paste0("\\hspace{1em}","Public Assistance"),
+    paste0("\\hspace{1em}","Supplemental Security Income", "\\break"),
+    "SD of Random Intercepts",
+    "Conditional R\\textsuperscript{2}",
+    "Marginal R\\textsuperscript{2}"
+    ),
+  B1 = get_model_results(lm_urban_pov, "estimate"),
+  CI1 = get_model_results(lm_urban_pov, "conf_int"),
+  p1 = get_model_results(lm_urban_pov, "p.value"),
+  B2 = get_model_results(lm_suburban_pov, "estimate"),
+  CI2 = get_model_results(lm_suburban_pov, "conf_int"),
+  p2 = get_model_results(lm_suburban_pov, "p.value"),
+  B3 = get_model_results(lm_rural_pov, "estimate"),
+  CI3 = get_model_results(lm_rural_pov, "conf_int"),
+  p3 = get_model_results(lm_rural_pov, "p.value"))
+```
+
+```{r}
+kable(
+  tab_03,
+  format = "latex",
+  booktabs = TRUE,
+  escape = FALSE,
+  longtable = F,
+  linesep = "",
+  col.names = c("Variable", "B", "95\\% CI", "p", "B", "95\\% CI", "p", "B", "95\\% CI", "p"),
+  align = c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c"),
+  caption = "Summary of Mixed-Effects Model for Variables Predicting Homelessness per 10,000 People in Poverty"
+  ) %>%
+  kable_styling(full_width = TRUE) %>%
+  column_spec(column = 1, width = "2in") %>%
+  column_spec(column = 3, width = "1in") %>%
+  column_spec(column = 6, width = "1in") %>%
+  column_spec(column = 8, width = "0.5in") %>%
+  column_spec(column = 9, width = "1in") %>%
+  add_header_above(
+    c(" " = 1, "Urban CoCs (N=104)" = 3, "Suburban CoCs (N=165)" = 3, "Rural CoCs (N=111)" = 3),
+    escape = FALSE
+    ) %>%
+  kableExtra::landscape()
+```
+
+# Generate Charts
+```{r echo=FALSE}
+ggplot(homeless, aes(homeless_rate_full, fill = category)) + 
+  geom_density() + 
+  facet_grid(~category) + 
+  theme_light() +
+  labs(x = "Rate",
+       y = "Density",
+       title = "Figure 1: Distribution of Homelessness Rate\n(per 10,000 People in the General Population)") +
+  theme(legend.position = "none")
+```
+
+```{r echo=FALSE}
+ggplot(homeless, aes(homeless_rate_pov, fill = category)) + 
+  geom_density() + 
+  facet_grid(~category) + 
+  theme_light() +
+  labs(x = "Rate",
+       y = "Density",
+       title = "Figure 2: Distribution of Homelessness Rate\n(per 10,000 People in Poverty)") +
+  theme(legend.position = "none")
+```
+
+
+```{r echo=FALSE}
+ggplot(homeless, aes(x = homeless_rate_full, y = category, fill = category)) + 
+  geom_boxplot() + 
+  theme_light() +
+  labs(x = "Rate",
+       y = "",
+       title = "Figure 3: Distribution of Homelessness Rate\n(per 10,000 People in the General Population)") +
+  theme(legend.position = "none")
+```
+
+```{r echo=FALSE}
+ggplot(homeless, aes(x = homeless_rate_pov, y = category, fill = category)) + 
+  geom_boxplot() + 
+  theme_light() +
+  labs(x = "Rate",
+       y = "",
+       title = "Figure 4: Distribution of Homelessness Rate\n(per 10,000 People in Poverty)") +
+  theme(legend.position = "none")
+```

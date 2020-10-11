@@ -1,0 +1,47 @@
+
+# #######################################################################
+# File-Name:      analysis.Rmd
+# Purpose:        Used to run all six of my mixed-effects models
+# #######################################################################
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(car)
+library(caret)
+library(lme4)
+library(lmerTest)
+library(broom.mixed)
+```
+
+```{r}
+homeless <- readRDS("homeless_data.RDS")
+homeless$state <- factor(homeless$state)
+```
+
+# 1. Split Data into Regions
+
+```{r}
+urban <- homeless %>% 
+  filter(category == "Urban") %>% select(-coc_number, -pop_full, -pop_pov, -homeless, -category)
+
+suburban <- homeless %>%
+  filter(category == "Suburban") %>% select(-coc_number, -pop_full, -pop_pov, -homeless, -category)
+
+rural <- homeless %>%
+  filter(category == "Rural") %>% select(-coc_number, -pop_full, -pop_pov, -homeless, -category)
+```
+
+
+# 2. Run Models for Rate Per 10K in Gen. Population
+```{r}
+lm_urban_full <- lmerTest::lmer(log(homeless_rate_full) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(poverty) + log(older) + (1|state), urban)
+lm_suburban_full <- lmerTest::lmer(log(homeless_rate_full) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(poverty) + log(older) + (1|state), suburban)
+lm_rural_full <- lmerTest::lmer(log(homeless_rate_full) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(poverty) + log(older) + (1|state), rural)
+```
+
+# 3. Run Models for Rate Per 10K in Poverty
+```{r}
+lm_urban_pov <- lmerTest::lmer(log(homeless_rate_pov) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(older) + (1|state), urban)
+lm_suburban_pov <- lmerTest::lmer(log(homeless_rate_pov) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(older) + (1|state), suburban)
+lm_rural_pov <- lmerTest::lmer(log(homeless_rate_pov) ~ log(black) + log(hispanic) + log(share_rent) + log(unemployment) + log(share_pa) + log(share_ssi) + log(gini) + log(rent) + log(vacancy) + log(single) + log(veteran) + log(older) + (1|state), rural)
+```
